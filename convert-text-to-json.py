@@ -202,6 +202,7 @@ try:
     loop_list.append(data)
     #print(data)
     #print(loop_list)
+    '''old save function
     print("Saving list as JSON file")
     current_date_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     file_name = f"HD_JSON_{current_date_time}.json"
@@ -209,6 +210,24 @@ try:
     with open(file_name, "w") as file:
         json.dump(loop_list, file, indent=4)
     print("Save Complete!")
+    '''
+    #new save function
+    file_date =  "./default_extraction_output/" + "HD-comparison-" + datetime.now().strftime("%Y-%m-%d_%H-%M")
+    save_file_path = easygui.filesavebox(
+        default=f"{file_date}",
+        filetypes=["*.json"],
+        title="Choose where to save the extracted Order Guide")
+
+    if save_file_path is None:
+        print("No file selected. Exiting.")
+        exit()
+    if not save_file_path.endswith('.json'):
+        save_file_path += '.json'
+        
+    with open(save_file_path, "w") as outfile:
+        json.dump(loop_list, outfile, indent=2)
+        print(f"JSON dumped to {save_file_path}")
+
 except Exception as e:
     print(f"An error occurred: {e}")
             

@@ -26,7 +26,7 @@ def findModel(text):
 def findModelName(text):
     #first split based on unique Model Code String
     #second split is to remove Family and Model strings, leaving Model Name (multi word names works)
-    pattern = r"1....\*T"
+    pattern = r"1....\*V"
     model_name = re.split(pattern, text)
     model_name = re.split(" ", model_name[0])
     model_name = model_name[2:]
@@ -62,7 +62,7 @@ def findTrim(text):
         return matches[0]
 
 def findTrimName(text):
-    pattern = r"(\w+)(?= Two-Up-Dark Billiard Gray)"
+    pattern = r"(?<=Vivid Black - |Roasted Amber Fade - |Sapphire Storm - |Phantom Eclipse - |Emerald Storm - )(\w+\s\d\s\w+|\w+\s\w+|\w+)"
     matches = re.findall(pattern, text)
     if not matches:
         return False
@@ -71,7 +71,7 @@ def findTrimName(text):
         return name
 
 def findHeadTrimName(text):
-    pattern = r"(\w+)(?=-Dark Billiard Gray)"
+    pattern = r"(?<=Vivid Black - |Roasted Amber Fade - |Sapphire Storm - |Phantom Eclipse - |Emerald Storm - )(\w+\s\d\s\w+|\w+\s\w+|\w+)"
     matches = re.findall(pattern, text)
     if not matches:
         return False
@@ -126,7 +126,7 @@ def findLoopOption(text):
             option_array.append(diff_MDL)
         else:
             trim_option = {"option": f"{trim}", "type": "Trim", "name": f"{trim_name}", "msrp": f"{msrp}", "invoice": f"{invoice}"}
-            loop_option = {"option": f"{option}", "type": f"{option_type}", "name": "Dark Billiard Gray", "msrp": "0", "invoice": "0"}
+            loop_option = {"option": f"{option}", "type": f"{option_type}", "name": "Vivid Black", "msrp": "0", "invoice": "0"}
         option_array.append(trim_option)
         option_array.append(loop_option)
         
@@ -178,9 +178,9 @@ try:
                         "name": "Base Price",
                         "msrp": findMSRP(line),
                         "invoice": findInvoice(line)})
-                options.append({"option": "M85",
+                options.append({"option": "M04",
                         "type": "Color",
-                        "name": "Dark Billiard Gray",
+                        "name": "Vivid Black",
                         "msrp": "0",
                         "invoice": "0"})
                 head_trim = findTrim(line)

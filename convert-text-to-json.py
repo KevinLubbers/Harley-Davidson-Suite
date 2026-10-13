@@ -54,7 +54,7 @@ def findMSRP(text):
     return msrp
     
 def findTrim(text):
-    pattern = r"G0\d(?=-)"
+    pattern = r"(?<=M\d\d\s-\s)G0\d"
     matches = re.findall(pattern, text)
     if not matches:
         return False
@@ -67,7 +67,7 @@ def findTrimName(text):
     if not matches:
         return False
     else:
-        name = matches[0] + " Two-Up Trim"
+        name = matches[0] + " Trim"
         return name
 
 def findHeadTrimName(text):

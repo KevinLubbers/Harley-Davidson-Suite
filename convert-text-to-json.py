@@ -54,7 +54,7 @@ def findMSRP(text):
     return msrp
     
 def findTrim(text):
-    pattern = r"(?<=M\d\d\s-\s)G0\d"
+    pattern = r"(?<=\w\d\d\s-\s)G0\d"
     matches = re.findall(pattern, text)
     if not matches:
         return False
@@ -78,6 +78,13 @@ def findHeadTrimName(text):
     else:
         name = matches[0] + " Trim"
         return name
+
+def findColor(text):
+    pattern = r"(\w\d\d)(?=\s-\sG0\d)"
+    code_matches = re.findall(pattern, text)
+    pattern = r"(?<=Trim )(\w+\s\w+\s\w+|\w+\s\w+|\w+)"
+    name_matches = re.findall(pattern, text)
+    return code_matches[0], name_matches[0]
     
 def findLoopOption(text):
     option_array = []
@@ -178,9 +185,10 @@ try:
                         "name": "Base Price",
                         "msrp": findMSRP(line),
                         "invoice": findInvoice(line)})
-                options.append({"option": "M04",
+                color_code, color_name = findColor(line)
+                options.append({"option": f"{color_code}",
                         "type": "Color",
-                        "name": "Vivid Black",
+                        "name": f"{color_name}",
                         "msrp": "0",
                         "invoice": "0"})
                 head_trim = findTrim(line)

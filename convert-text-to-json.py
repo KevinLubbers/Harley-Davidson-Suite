@@ -62,7 +62,7 @@ def findTrim(text):
         return matches[0]
 
 def findTrimName(text):
-    pattern = r"(?:Vivid Black - |Roasted Amber Fade - |Sapphire Storm - |Phantom Eclipse - |Emerald Storm - |Denim Black - )(\w+\s\d\s\w+|\w+\s\w+|\w+)"
+    pattern = r"(?:Vivid Black - |Roasted Amber Fade - |Sapphire Storm - |Phantom Eclipse - |Emerald Storm - |Denim Black - |Black Denim - )(\w+\s\d\s\w+|\w+\s\w+|\w+)"
     matches = re.findall(pattern, text)
     if not matches:
         return False
@@ -71,7 +71,7 @@ def findTrimName(text):
         return name
 
 def findHeadTrimName(text):
-    pattern = r"(?:Vivid Black - |Roasted Amber Fade - |Sapphire Storm - |Phantom Eclipse - |Emerald Storm - |Denim Black - )(\w+\s\d\s\w+|\w+\s\w+|\w+)"
+    pattern = r"(?:Vivid Black - |Roasted Amber Fade - |Sapphire Storm - |Phantom Eclipse - |Emerald Storm - |Denim Black - |Black Denim - )(\w+\s\d\s\w+|\w+\s\w+|\w+)"
     matches = re.findall(pattern, text)
     if not matches:
         return False

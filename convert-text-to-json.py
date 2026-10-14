@@ -62,7 +62,7 @@ def findTrim(text):
         return matches[0]
 
 def findTrimName(text):
-    pattern = r"(?:Vivid Black - |Roasted Amber Fade - |Sapphire Storm - |Phantom Eclipse - |Emerald Storm - )(\w+\s\d\s\w+|\w+\s\w+|\w+)"
+    pattern = r"(?:Vivid Black - |Roasted Amber Fade - |Sapphire Storm - |Phantom Eclipse - |Emerald Storm - |Denim Black - )(\w+\s\d\s\w+|\w+\s\w+|\w+)"
     matches = re.findall(pattern, text)
     if not matches:
         return False
@@ -71,7 +71,7 @@ def findTrimName(text):
         return name
 
 def findHeadTrimName(text):
-    pattern = r"(?:Vivid Black - |Roasted Amber Fade - |Sapphire Storm - |Phantom Eclipse - |Emerald Storm - )(\w+\s\d\s\w+|\w+\s\w+|\w+)"
+    pattern = r"(?:Vivid Black - |Roasted Amber Fade - |Sapphire Storm - |Phantom Eclipse - |Emerald Storm - |Denim Black - )(\w+\s\d\s\w+|\w+\s\w+|\w+)"
     matches = re.findall(pattern, text)
     if not matches:
         return False
@@ -126,14 +126,15 @@ def findLoopOption(text):
             option_type = option_split[1]
             
         trim_name = findTrimName(text)
-        if not trim_name:
-            trim_option = {"option": f"{trim}", "type": "Trim", "name": "Enthusiast Trim", "msrp": "0", "invoice": "0"}
-            loop_option = {"option": f"{option}", "type": f"{option_type}", "name": "Midnight Ember", "msrp": "0", "invoice": "0"}
+        color_code, color_name = findColor(line)
+        if trim_name:
+            trim_option = {"option": f"{trim}", "type": "Trim", "name": f"{trim_name}", "msrp": "0", "invoice": "0"}
+            loop_option = {"option": f"{color_code}", "type": "Color", "name": f"{color_name}", "msrp": "0", "invoice": "0"}
             diff_MDL = {"option": "*MDL", "type": "Differential", "name": "Base Price", "msrp": f"{msrp}", "invoice": f"{invoice}"}            
             option_array.append(diff_MDL)
         else:
             trim_option = {"option": f"{trim}", "type": "Trim", "name": f"{trim_name}", "msrp": f"{msrp}", "invoice": f"{invoice}"}
-            loop_option = {"option": f"{option}", "type": f"{option_type}", "name": "Vivid Black", "msrp": "0", "invoice": "0"}
+            loop_option = {"option": f"{option}", "type": f"{option_type}", "name": "Vivid Black (CHECK)", "msrp": "0", "invoice": "0"}
         option_array.append(trim_option)
         option_array.append(loop_option)
         
@@ -145,7 +146,7 @@ try:
     
     desktop = os.path.join(os.path.expanduser("~"), "Desktop")
     easygui.msgbox(
-        msg="Please select a Data File that you want to extract data from",
+        msg="Please select the sanitized HD Order Guide in txt format",
         title="Order Guide Extractor"
     )
 

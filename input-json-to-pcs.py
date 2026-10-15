@@ -202,18 +202,13 @@ try:
     #useful message with choice which effects navigation
     cal_response = easygui.ynbox("Did you select a 49 State file or California file?", title="49S or CAL?", choices=["49 State", "California"])
     
-    #Bring PCS Window to foreground and maximize
-    pcs_window = pygetwindow.getWindowsWithTitle('PCS Maintenance')
-    pcs_window[0].activate()
-    pcs_window[0].maximize()
-    
     
     #load in JSON file then loop through models
     with open(file_path, "r") as file:
         data = json.load(file)
     time.sleep(2)    
     for i in range(len(data)):
-        print(f"{i}.) {data[i]['model']} - {data[i]['name']}")
+        print(f"{i}.) {data[i]['model']} - {data[i]['name']} : {data[i]['family']}")
 
     selected_models = None
     while selected_models is None:
@@ -224,8 +219,12 @@ try:
             continue
         selected_models = [data[i] for i in indexes]
 
-    print(f"Selected models: {selected_models}")
+    print(f"Selected models: {[model.get('name') for model in selected_models]}")
 
+    #Bring PCS Window to foreground and maximize
+    pcs_window = pygetwindow.getWindowsWithTitle('PCS Maintenance')
+    pcs_window[0].activate()
+    pcs_window[0].maximize()
 
     for each_model in selected_models:
         #type model code then year then refresh

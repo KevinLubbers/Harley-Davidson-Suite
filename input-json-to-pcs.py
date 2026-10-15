@@ -212,7 +212,22 @@ try:
     with open(file_path, "r") as file:
         data = json.load(file)
     time.sleep(2)    
-    for each_model in data:
+    for i in range(len(data)):
+        print(f"{i}.) {data[i]['model']} - {data[i]['name']}")
+
+    selected_models = None
+    while selected_models is None:
+        choice = input(f"Select the model(s) (0 - {len(data) - 1}), each separated by a space: ")
+        indexes = [int(i) for i in choice.split()]
+        if not all(0 <= i < len(data) for i in indexes):
+            print("Invalid input. Please enter valid indexes.")
+            continue
+        selected_models = [data[i] for i in indexes]
+
+    print(f"Selected models: {selected_models}")
+
+
+    for each_model in selected_models:
         #type model code then year then refresh
         pyautogui.write(each_model["model"], interval=0.1)
         pyautogui.press('tab')
@@ -241,7 +256,7 @@ try:
         display_list = []
         #loop through options for current model
         for each_option in each_model["options"]:
-            display_text = each_option["option"] + " - " + each_option["name"]
+            display_text = each_option["option"] + " - " + each_option["name"] + " - " + each_option["type"] + " - " + each_option["invoice"] + " - " + each_option["msrp"]
             display_list.append(display_text)
             if each_option["type"] == "Color" or each_option["type"] == "Trim-Color":
                 paint_list.append(each_option["option"])

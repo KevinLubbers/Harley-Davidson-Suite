@@ -179,13 +179,9 @@ def exitScreen():
 
 try:
     #MSG Box to select JSON file
-    desktop = os.path.join(os.path.expanduser("~"), "Desktop")
-    easygui.msgbox(
-        msg="Please select a JSON File that you want to enter into PCS",
-        title="HD Data Input"
-    )
+    setup_or_proof = easygui.ynbox("Is this a model setup or proof updates?", title="Model Setup or Proof?", choices=["Model Setup", "Proof"])
 
-    file_path = easygui.fileopenbox(title="Select a JSON file", default=os.path.join(desktop, "*.json"))
+    file_path = easygui.fileopenbox(title="Select a JSON file", default=os.path.join(os.getcwd(), "*.json"))
 
     if file_path:
         print(f"Selected file: {file_path}")
@@ -203,13 +199,13 @@ try:
     cal_response = easygui.ynbox("Did you select a 49 State file or California file?", title="49S or CAL?", choices=["49 State", "California"])
     
     
-    #load in JSON file then loop through models
+    #load in JSON file then loop through models to create a cli menu
     with open(file_path, "r") as file:
         data = json.load(file)
-    time.sleep(2)    
     for i in range(len(data)):
         print(f"{i}.) {data[i]['model']} - {data[i]['name']} : {data[i]['family']}")
 
+    #model batch selection menu
     selected_models = None
     while selected_models is None:
         choice = input(f"Select the model(s) (0 - {len(data) - 1}), each separated by a space: ")
@@ -220,6 +216,7 @@ try:
         selected_models = [data[i] for i in indexes]
 
     print(f"Selected models: {[model.get('name') for model in selected_models]}")
+    time.sleep(1)
 
     #Bring PCS Window to foreground and maximize
     pcs_window = pygetwindow.getWindowsWithTitle('PCS Maintenance')
@@ -295,9 +292,10 @@ try:
                 if not float(invoice_check) == float(each_option["invoice"]):
                     #check if another *MDL option(we don't want to delete base price)
                     if not each_option["type"] == "Differential":
+                        if setup_or_proof:
+                            deleteOption()
                         #add to bad price list and delete record
                         bad_price.append(each_option)
-                        deleteOption()
                         addOption(each_option["invoice"], each_option["msrp"])
                     else:
                         addOption(each_option["invoice"], each_option["msrp"], True)
@@ -308,9 +306,10 @@ try:
                     time.sleep(1)
                     msrp_check = pyperclip.paste().strip()
                     if not float(msrp_check) == float(each_option["msrp"]):
+                        if setup_or_proof:
+                            deleteOption()
                         #add to bad price list and delete record
                         bad_price.append(each_option)
-                        deleteOption()
                         addOption(each_option["invoice"], each_option["msrp"])
                     else:
                         good_price.append(each_option)
@@ -353,11 +352,7 @@ try:
         pyautogui.hotkey('shift', 'tab')
         time.sleep(.5)
         
-        
-        
-        #remove after testing
-        #print(each_model)
-
+    #model loop end
     
 except Exception as e:
     print(f"An error occurred: {e}")

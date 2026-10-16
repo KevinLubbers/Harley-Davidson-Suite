@@ -144,13 +144,12 @@ def findLoopOption(text):
 
 try:
     
-    desktop = os.path.join(os.path.expanduser("~"), "Desktop")
     easygui.msgbox(
         msg="Please select the sanitized HD Order Guide in txt format",
         title="Order Guide Extractor"
     )
 
-    file_path = easygui.fileopenbox(title="Select a TXT file", default=os.path.join(desktop, "*.txt"))
+    file_path = easygui.fileopenbox(title="Select a TXT file", default=os.path.join(os.getcwd(), "*.txt"))
 
     if file_path:
         print(f"Selected file: {file_path}")

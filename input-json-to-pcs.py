@@ -249,13 +249,18 @@ try:
         bad_price = []
         good_price = []
         paint_list = []
+        #contains all options for this MY - used to compare against last MY options
         display_list = []
+        display_list.append(f"{'Option':<5} {'Type':<15} {'Invoice':<9} {'MSRP':<9} {'Name':<30}")
         #loop through options for current model
         for each_option in each_model["options"]:
-            display_text = each_option["option"] + " - " + each_option["name"] + " - " + each_option["type"] + " - " + each_option["invoice"] + " - " + each_option["msrp"]
+            display_text = f"{each_option["option"]:<5} {each_option["type"]:<15} {each_option["invoice"]:<9} {each_option["msrp"]:<9} {each_option["name"]:<30}"
             display_list.append(display_text)
             if each_option["type"] == "Color" or each_option["type"] == "Trim-Color":
                 paint_list.append(each_option["option"])
+
+            #grab list of "old" options from PCS and compare to new options
+            
             #write option code then check if it exists in PCS
             #add to bad options if doesnt exist
             pyautogui.write(each_option["option"], interval=0.1)

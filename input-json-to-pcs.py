@@ -251,16 +251,41 @@ try:
         paint_list = []
         #contains all options for this MY - used to compare against last MY options
         display_list = []
-        display_list.append(f"{'Option':<5} {'Type':<15} {'Invoice':<9} {'MSRP':<9} {'Name':<30}")
+        display_list.append(f"{'Option':<7} {'Type':<15} {'Invoice':<9} {'MSRP':<9} {'Name':<30}")
         #loop through options for current model
         for each_option in each_model["options"]:
-            display_text = f"{each_option["option"]:<5} {each_option["type"]:<15} {each_option["invoice"]:<9} {each_option["msrp"]:<9} {each_option["name"]:<30}"
+            display_text = f"{each_option["option"]:<7} {each_option["type"]:<15} {each_option["invoice"]:<9} {each_option["msrp"]:<9} {each_option["name"]:<30}"
             display_list.append(display_text)
             if each_option["type"] == "Color" or each_option["type"] == "Trim-Color":
                 paint_list.append(each_option["option"])
 
             #grab list of "old" options from PCS and compare to new options
-            
+            for _ in range(7):
+                pyautogui.press('tab')
+            time.sleep(.5)
+            pyautogui.press('right')
+            pyautogui.keyDown('shift')
+            pyautogui.press('right')
+            pyautogui.press('pagedown')
+            pyautogui.press('pagedown')
+            pyautogui.press('pagedown')
+            pyautogui.press('pagedown')
+            pyautogui.keyUp('shift')
+            time.sleep(1)
+            pyautogui.hotkey('ctrl', 'c')
+            time.sleep(2)
+            copy_options = pyperclip.paste().strip()
+            lookup = []
+            #separate the code and name from the clipboard data
+            for line in copy_options.splitlines():
+                code, name = line.split(maxsplit=1)
+                lookup.append((code, name))
+            #return to option input field
+            for _ in range(7):
+                pyautogui.hotkey('shift', 'tab')
+            time.sleep(.5)
+            #end grabbing of "old" PCS options
+
             #write option code then check if it exists in PCS
             #add to bad options if doesnt exist
             pyautogui.write(each_option["option"], interval=0.1)

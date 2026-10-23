@@ -3,45 +3,56 @@ import pymupdf
 import re
 import datetime
 
+#user selects pdf
 file_path = easygui.fileopenbox(title="Select the Harley-Davidson PDF to Convert", filetypes=["*.pdf"])
-file_name = file_path.split("/")[-1]
+file_name = file_path.split("\\")[-1]
 today = datetime.date.today().strftime("%m-%d-%Y")
 whole_text = ""
 if file_path:
+    #open file and extract text from each page
     with pymupdf.open(file_path) as pdf:
-    # Loop through each page
         for page_number in range(pdf.page_count):
             page = pdf.load_page(page_number)
             page_text = page.get_text("text")
             whole_text += page_text
 
-    # Print the extracted text
+    #remove odd characters 
     whole_text = whole_text.replace("Standard", "$0")
     whole_text = whole_text.replace("Stardard", "$0")
     whole_text = whole_text.replace("™", "")
     whole_text = whole_text.replace("©", "")
     whole_text = whole_text.replace("®", "")
 
+    #lines removed without RegEx
     lines_to_remove = ["Family","Model", "Model Name", "Model Code", "Spec",
         "Option Code Option Type", "Option Name", "MSRP", "Dealer Net",
-        "Trike", "Softail", "Revolution Max", "Touring"]
+        "2027 MODEL YEAR - MILITARY DOM", "2027 MODEL YEAR - MILITARY CAL",
+        "CONFIDENTIAL PRICE LIST"]
 
+    #lines removed with RegEx
     whole_text = re.sub(
-        r"^(?:Anti-Lock Braking \(ABS\) standard|\d|Security System standard|RIder Safety Enhancements standard)(?:\n)",
+        r"^(?:Anti-Lock Braking \(ABS\) standard|\d|updated \d\d?/\d\d?/\d\d\d\d|EFFECTIVE [a-zA-Z]{3}\s\d\d\d\d|Security System standard|RIder Safety Enhancements standard)(?:\n)",
         "",
         whole_text,
         flags=re.MULTILINE
     )
+
+    #remove lines not in list
     whole_text = "\n".join(
-        line for line in whole_text.splitlines()
-        if line not in lines_to_remove
+        line.strip() for line in whole_text.splitlines()
+        if line.strip() not in lines_to_remove
     )
+    #Removes HEADER Family Names
+    whole_text = re.sub(r"CVO\n(?=CVO\n)", "", whole_text)
+    whole_text = re.sub(r"Touring\n(?=Touring\n|TOURING\n)", "", whole_text)
+    whole_text = re.sub(r"Softail\n(?=Softail\n|SOFTAIL\n)", "", whole_text)
+    whole_text = re.sub(r"Trike\n(?=Trike\n|TRIKE\n)", "", whole_text)
+    whole_text = re.sub(r"Revolution Max\n(?=REVOLUTION MAX\n|Revolution Max\n|REVOLUTIONMAX\n)", "", whole_text)
 
+    #use Freight to determine where each model ends (2 lines after Freight)
     lines = whole_text.splitlines()
-
     list_items = []
     current_item = []
-
     i = 0
     while i < len(lines):
         current_item.append(lines[i])
@@ -60,6 +71,15 @@ if file_path:
     if current_item:
         list_items.append(current_item)
 
+    #bring each model together by adding a line break after two money matches
+    full_print = ""
     for each_list in list_items:
-        print(" ".join(each_list))
-        print("\n")
+        print_text = " ".join(each_list)
+        print_text = re.sub(r'(\$\d[\d,]*\s+\$\d[\d,]*)\s*', r'\1\n', print_text)
+        full_print += print_text
+
+    #save output to text file
+    with open(f"HD_Sanitized_{file_name}_{today}.txt", "w") as file:
+        file.write(full_print)
+
+    print(f"File saved as HD_Sanitized_{file_name}_{today}.txt")

@@ -366,11 +366,14 @@ try:
             title="Delete Old Options"
         )
         
-        #Log Info then back out to model screen
+        #Log Info 
         logger.info(f"Model: {each_model["model"]} - {each_model["name"]}")
         logger.info(f"Bad Options: {bad_options}")
         logger.info(f"Good Options with Bad Prices: {bad_price}")
         logger.info(f"Good Options with Good Prices: {good_price}")
+        #make sure PCS is focused before backing out of options screen
+        #then back out
+        pcs_window[0].activate()
         exitScreen()
         
         #return to model code input box(undo initial tabs)

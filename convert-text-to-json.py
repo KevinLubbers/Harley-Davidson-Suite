@@ -89,9 +89,18 @@ def findColor(text):
     
 def findLoopOption(text):
     option_array = []
+
+    #invoice and msrp validation check
     msrp = findMSRP(text)
     invoice = findInvoice(text)
+    if float(invoice) > float(msrp):
+        validation_errors.append(f"Bad invoice price on line {debug_line_count}")
+
+    #trim code validation
     trim = findTrim(text)
+    if trim and trim not in trim_code_set:
+        validation_errors.append(f"Bad trim code found on line {debug_line_count}")
+
     option_split = re.split(" ", text)
     if not trim:
         if len(option_split) <= 3:
@@ -100,6 +109,9 @@ def findLoopOption(text):
             option_type = "Freight"
             loop_option = {"option": f"{option}", "type": f"{option_type}", "name": f"{option_name}", "msrp": f"{msrp}", "invoice": f"{invoice}"}
             option_array.append(loop_option)
+            #invoice and msrp should be the same for DFRT
+            if float(invoice) != float(msrp):
+                validation_errors.append(f"Bad DFRT price on line {debug_line_count}")
         else:
             option = option_split[0]
             option_name = " ".join(option_split[2:-2])
@@ -158,84 +170,129 @@ try:
         print("No file selected.")
         os.system("pause")
 
+    #Holds all converted data
     loop_list = []
     data = {}
     options = []
-    
+
+    #used in validation
+    debug_line_count = 1
+    validation_errors = []
+
+    family_set = {"REVOLUTIONMAX", "TOURING", "TRIKE", "SOFTAIL", "CVO"}
+
+    model_codes_seen = set()
+    model_code_duplicates = set()
+
+    trim_code_set = {"G00", "G01", "G06"}
+    trim_name_set = {"Chrome Trim", "Black Trim", "Solo Trim",
+    "Solo Chrome Trim", "Solo Black Trim", "Chrome 2 up Trim", "Black 2 up Trim"}
+    #end validation variables
+
     with open(file_path) as file:
         lines = file.readlines()
         for line in lines:
             line = line.strip()
             check = isHeader(line)
-            
+
+            #if check is true, the line is a header
             if check:
+                #since it's a header and there's data already (not first cycle), add data then clear data
                 if data:
                     data["options"] = options
                     loop_list.append(data)
-                    #print(data)
                     data = {}
                     options = []
-                    
+
+                #start header validation
+                #family check
+                family_name = findFamily(line)
+                if family_name.upper() not in family_set:
+                    validation_errors.append(f"Unknown family {family_name} on line {debug_line_count}")
+
+                #use 2 sets to find duplicate model codes
+                model_code = findModel(line)
+                if model_code in model_codes_seen:
+                    model_code_duplicates.add(model_code)
+                    validation_errors.append(f"Duplicate model code {model_code} on line {debug_line_count}")
+                else:
+                    model_codes_seen.add(model_code)
+
+                #invoice and msrp checks
+                header_msrp = findMSRP(line)
+                header_invoice = findInvoice(line)
+                if header_msrp == "0" or header_invoice == "0":
+                    validation_errors.append(f"$0 price record found on HEADER line {debug_line_count}")
+                if float(header_invoice) >= float(header_msrp):
+                    validation_errors.append(f"Bad invoice price on line {debug_line_count}")
+
+                #color check
+                color_code, color_name = findColor(line)
+
+                #trim check
+                head_trim = findTrim(line)
+                trim_name = findHeadTrimName(line)
+                if head_trim not in trim_code_set:
+                    validation_errors.append(f"Unknown trim code {head_trim} on line {debug_line_count}")
+                if trim_name not in trim_name_set:
+                    validation_errors.append(f"Unknown trim name {trim_name} on line {debug_line_count}")
+                #end header validation
+
+                #start adding header data   
                 data = {
-                    "family": findFamily(line),
-                    "model": findModel(line),
+                    "family": family_name,
+                    "model": model_code,
                     "name": findModelName(line),
                     }
                 options.append({"option": "*MDL",
                         "type": "Price",
                         "name": "Base Price",
-                        "msrp": findMSRP(line),
-                        "invoice": findInvoice(line)})
-                color_code, color_name = findColor(line)
+                        "msrp": header_msrp,
+                        "invoice": header_invoice})
                 options.append({"option": f"{color_code}",
                         "type": "Color",
                         "name": f"{color_name}",
                         "msrp": "0",
                         "invoice": "0"})
-                head_trim = findTrim(line)
-                
                 if head_trim:
-                    trim_name = findHeadTrimName(line)
                     options.append({"option": f"{head_trim}",
                         "type": "Base Trim",
                         "name": f"{trim_name}",
                         "msrp": "0",
                         "invoice": "0"})
-                
+            #if line is not a header, it must be an option!    
             else:
                 options.extend(findLoopOption(line))
+
+            
+            debug_line_count += 1
+        #end each line loop
                 
-    
+    #print validation errors
+    if len(validation_errors) > 0:
+        print("Cannot save file.")
+        print("Validation Errors:")
+        for error in validation_errors:
+            print(error)
+    #or save file to where user chooses
+    else:
+        data["options"] = options
+        loop_list.append(data)
+        file_date =  "./default_extraction_output/" + "HD-comparison-" + datetime.now().strftime("%Y-%m-%d_%H-%M")
+        save_file_path = easygui.filesavebox(
+            default=f"{file_date}",
+            filetypes=["*.json"],
+            title="Choose where to save the extracted Order Guide")
 
-    data["options"] = options
-    loop_list.append(data)
-    #print(data)
-    #print(loop_list)
-    '''old save function
-    print("Saving list as JSON file")
-    current_date_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    file_name = f"HD_JSON_{current_date_time}.json"
-    
-    with open(file_name, "w") as file:
-        json.dump(loop_list, file, indent=4)
-    print("Save Complete!")
-    '''
-    #new save function
-    file_date =  "./default_extraction_output/" + "HD-comparison-" + datetime.now().strftime("%Y-%m-%d_%H-%M")
-    save_file_path = easygui.filesavebox(
-        default=f"{file_date}",
-        filetypes=["*.json"],
-        title="Choose where to save the extracted Order Guide")
-
-    if save_file_path is None:
-        print("No file selected. Exiting.")
-        exit()
-    if not save_file_path.endswith('.json'):
-        save_file_path += '.json'
-        
-    with open(save_file_path, "w") as outfile:
-        json.dump(loop_list, outfile, indent=2)
-        print(f"JSON dumped to {save_file_path}")
+        if save_file_path is None:
+            print("No file selected. Exiting.")
+            exit()
+        if not save_file_path.endswith('.json'):
+            save_file_path += '.json'
+            
+        with open(save_file_path, "w") as outfile:
+            json.dump(loop_list, outfile, indent=2)
+            print(f"JSON dumped to {save_file_path}")
 
 except Exception as e:
     print(f"An error occurred: {e}")

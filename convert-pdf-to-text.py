@@ -1,7 +1,7 @@
 import easygui
 import pymupdf
 import re
-import datetime
+from datetime import datetime
 
 #user selects pdf
 file_path = easygui.fileopenbox(title="Select the Harley-Davidson PDF to Convert", filetypes=["*.pdf"])

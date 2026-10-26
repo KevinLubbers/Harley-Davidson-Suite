@@ -6,7 +6,6 @@ import datetime
 #user selects pdf
 file_path = easygui.fileopenbox(title="Select the Harley-Davidson PDF to Convert", filetypes=["*.pdf"])
 file_name = file_path.split("\\")[-1]
-today = datetime.date.today().strftime("%m-%d-%Y")
 whole_text = ""
 if file_path:
     #open file and extract text from each page
@@ -79,7 +78,8 @@ if file_path:
         full_print += print_text
 
     #save output to text file
-    with open(f"HD_Sanitized_{file_name}_{today}.txt", "w") as file:
+    file_date =  f"./default_extraction_output/" + f"HD_Sanitized_{file_name}-" + datetime.now().strftime("%Y-%m-%d_%H-%M")
+    with open(f"{file_date}.txt", "w") as file:
         file.write(full_print)
 
-    print(f"File saved as HD_Sanitized_{file_name}_{today}.txt")
+    print(f"File saved.")

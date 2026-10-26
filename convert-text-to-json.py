@@ -26,6 +26,7 @@ def findModel(text):
 def findModelName(text):
     #first split based on unique Model Code String
     #second split is to remove Family and Model strings, leaving Model Name (multi word names works)
+    #last character has changed between MY26 and 27
     pattern = r"1....\*V"
     model_name = re.split(pattern, text)
     model_name = re.split(" ", model_name[0])

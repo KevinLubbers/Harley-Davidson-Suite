@@ -99,7 +99,7 @@ def findLoopOption(text):
     #trim code validation
     trim = findTrim(text)
     if trim and trim not in trim_code_set:
-        validation_errors.append(f"Bad trim code found on line {debug_line_count}")
+        validation_errors.append(f"Unknown trim code {trim} on line {debug_line_count}")
 
     option_split = re.split(" ", text)
     if not trim:
@@ -118,6 +118,10 @@ def findLoopOption(text):
             option_type = option_split[1]
             loop_option = {"option": f"{option}", "type": f"{option_type}", "name": f"{option_name}", "msrp": f"{msrp}", "invoice": f"{invoice}"}
             option_array.append(loop_option)
+            if len(option) > 3:
+                validation_errors.append(f"Bad option code found on line {debug_line_count}")
+            if option_type not in option_type_set:
+                validation_errors.append(f"Bad option type found on line {debug_line_count}")
     else:
         option = re.split("-", option_split[0])
         #carry over from old code I believe, should never happen
@@ -139,6 +143,8 @@ def findLoopOption(text):
             option_type = option_split[1]
             
         trim_name = findTrimName(text)
+        if trim_name not in trim_name_set:
+            validation_errors.append(f"Unknown trim name {trim_name} on line {debug_line_count}")
         color_code, color_name = findColor(line)
         if trim_name:
             trim_option = {"option": f"{trim}", "type": "Trim", "name": f"{trim_name}", "msrp": "0", "invoice": "0"}
@@ -187,6 +193,8 @@ try:
     trim_code_set = {"G00", "G01", "G06"}
     trim_name_set = {"Chrome Trim", "Black Trim", "Solo Trim",
     "Solo Chrome Trim", "Solo Black Trim", "Chrome 2 up Trim", "Black 2 up Trim"}
+
+    option_type_set = {"Color", "Trim", "Base Trim", "Trim-Color", "Wheel", "Suspension"}
     #end validation variables
 
     with open(file_path) as file:
